@@ -13,7 +13,6 @@
   "dependencies": {
     "linked-list": "^1.0.1",
     "promise-defer": "^1.0.0",
-    "result-js": "^3.0.2",
     "rustify-js": "^0.1.1",
     "verror": "^1.10.0"
   },
