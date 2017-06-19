@@ -1,0 +1,53 @@
+{
+  "name": "data-drift",
+  "version": "1.0.0",
+  "description": "Data streaming and scheduling library for Node.JS",
+  "author": {
+    "email": "me@marco-alka.de",
+    "name": "Marco Alka",
+    "url": "https://marco-alka.de"
+  },
+  "bugs": {
+    "url": "https://github.com/minecrawler/data-drift/issues"
+  },
+  "dependencies": {
+    "linked-list": "^1.0.1",
+    "promise-defer": "^1.0.0",
+    "result-js": "^3.0.2",
+    "rustify-js": "^0.1.1",
+    "verror": "^1.10.0"
+  },
+  "devDependencies": {
+    "coveralls": "^2.11.15",
+    "tap": "^10.3.3"
+  },
+  "keywords": [
+    "Data",
+    "Pipeline",
+    "Workflow",
+    "Stream",
+    "Stateful",
+    "Orderable",
+    "Customizable",
+    "Dynamic"
+  ],
+  "license": "MPL-2.0",
+  "main": "index.js",
+  "maintainers": [
+    {
+      "name": "maruru",
+      "email": "me@marco-alka.de"
+    }
+  ],
+  "optionalDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/minecrawler/data-drift.git"
+  },
+  "scripts": {
+    "test": "tap test.js --coverage --coverage-report=lcov"
+  },
+  "engines": {
+    "node": ">= 6"
+  }
+}
