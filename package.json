@@ -1,6 +1,6 @@
 {
   "name": "data-drift",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Data streaming and scheduling library for Node.JS",
   "author": {
     "email": "me@marco-alka.de",
@@ -13,18 +13,23 @@
   "dependencies": {
     "linked-list": "^1.0.1",
     "promise-defer": "^1.0.0",
+    "result-js": "^3.0.2",
     "rustify-js": "^0.1.1",
     "verror": "^1.10.0"
   },
   "devDependencies": {
     "coveralls": "^2.11.15",
-    "tap": "^8.0.1"
+    "tap": "^10.3.3"
   },
   "keywords": [
     "Data",
     "Pipeline",
     "Workflow",
-    "Stream"
+    "Stream",
+    "Stateful",
+    "Orderable",
+    "Customizable",
+    "Dynamic"
   ],
   "license": "MPL-2.0",
   "main": "index.js",

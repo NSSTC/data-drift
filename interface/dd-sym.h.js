@@ -5,4 +5,6 @@ module.exports = {
     itemID: Symbol(),
     workable: Symbol(),
     elapsedTime: Symbol(),
+    isLastPart: Symbol(),
+    hasBeenBuilt: Symbol(),
 };

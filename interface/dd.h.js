@@ -29,8 +29,11 @@
 //                                          sSs
 //                                           s
 
-module.exports = class DataDrift {
-    static get SegmentTypes() {
+const Stream = require('stream');
+
+
+module.exports = class DataDrift extends Stream.Writable {
+    static get SegmentType() {
         return {
             SOURCE: 0b001,
             WORKER: 0b010,
@@ -38,7 +41,15 @@ module.exports = class DataDrift {
         };
     };
 
-    constructor() { this._init(); };
+    constructor() { super({ objectMode: true, }); this._init(); };
+
+    /**
+     * Build pipeline and make it start working.
+     * You only have to call this method once to kick off the pipeline.
+     *
+     * @returns {boolean} true if the process was successful. If a source or drain is missing, false is returned.
+     */
+    buildPipeline() { throw new Error('Not implemented: DataDrift.buildPipeline'); };
 
     /**
      * Get position of a segment in the chain
@@ -47,8 +58,14 @@ module.exports = class DataDrift {
      * @returns {Option<number>}
      */
     getSegmentPosition(segment) { throw new Error('Not implemented: DataDrift.getSegmentPosition'); };
-    setSegmentPosition() { throw new Error('Not implemented: DataDrift.setSegmentPosition'); };
-    moveSegment() { throw new Error('Not implemented: DataDrift.moveSegment'); };
+
+    /**
+     * Change the position of one of the worker segments
+     *
+     * @param {number} segment segment ID
+     * @param {number} position new position, whereas 0 is the first index (after a source, if available)
+     */
+    setSegmentPosition(segment, position) { throw new Error('Not implemented: DataDrift.setSegmentPosition'); };
 
     /**
      * Register a new segment.
@@ -56,25 +73,28 @@ module.exports = class DataDrift {
      *   EPARAMETER: Either the type or the segment were not specified correctly.
      *   ESOURCEALREADYREGISTERED: A source has already been registered before. There can only be one source.
      *   EDRAINALREADYREGISTERED: A drain has already been registered before. There can only be one drain.
+     *   ESOURCEMUSTBEREADABLESTREAM: A source must be derived from a readable stream.
+     *   EDRAINMUSTBEWRITABLESTREAM: A drain must be derived from a writable stream.
      *   ECREATEITEM
      *
-     * @param {SegmentTypes} type
+     * @param {SegmentType} type
      * @param {function} segment
      * @returns {Result<number,VError>} segment ID as used by the Drift
      */
     registerSegment(type, segment) { throw new Error('Not implemented: DataDrift.registerSegment'); };
-    unregisterSegment() { throw new Error('Not implemented: DataDrift.unregisterSegment'); };
-    hasSegmentType() { throw new Error('Not implemented: DataDrift.hasSegmentType'); };
 
     /**
-     * work on data, given a complete queue
-     * Can return the following errnos in an Err:
-     *   ENOTREADY: The pipeline is missing important parts to function.
-     *   EWORKERERROR
+     * Unregister a segment from the pipeline
      *
-     * @param data
-     * @param state
-     * @returns {Promise<Result<number,VError>>} Time for completion in ms
+     * @param {number} segment segment ID
      */
-    workOnData(data, state) { throw new Error('Not implemented: DataDrift.hasSegmentType'); };
+    unregisterSegment(segment) { throw new Error('Not implemented: DataDrift.unregisterSegment'); };
+
+    /**
+     * Check if the pipeline has a certain segment type
+     *
+     * @param {SegmentType} type
+     * @returns {boolean}
+     */
+    hasSegmentType(type) { throw new Error('Not implemented: DataDrift.hasSegmentType'); };
 };

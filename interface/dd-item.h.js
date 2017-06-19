@@ -12,45 +12,39 @@ let idCounter = 0;
 /**
  * List-Item for blocking tasks
  *
- * @type {WorkflowItem}
+ * @type {WorkerItem}
  */
-module.exports.WorkflowItem = class WorkflowItem extends LinkedList.Item {
+module.exports.WorkerItem = class WorkflowItem extends LinkedList.Item {
 
     /**
      * Constructor
-     * The type has to be one of {DataDrift.SegmentTypes}
+     * The type has to be one of {DataDrift.SegmentType}
      *
-     * @throws if $type does not contain one of {DataDrift.SegmentTypes} or $task is not a callable
-     * @param {DataDrift.SegmentTypes} $type
+     * @throws if $type does not contain one of {DataDrift.SegmentType} or $task is not a callable
+     * @param {DataDrift.SegmentType} $type
      * @param {function(Object)} $task
      */
     constructor($type, $task) {
         super();
 
-        if (// todo: NodeJSv8+ Object.values(DataDrift.SegmentTypes).includes($type)
+        if (// todo: NodeJSv8+ Object.values(DataDrift.SegmentType).includes($type)
             Object
-                .keys(DataDrift.SegmentTypes)
-                .map(item => DataDrift.SegmentTypes[item])
+                .keys(DataDrift.SegmentType)
+                .map(item => DataDrift.SegmentType[item])
                 .indexOf($type)
                 < 0
         ) {
-            throw new Error('The WorkflowItem type has to contain one of {DataDrift.SegmentTypes}!');
+            throw new Error('The WorkerItem type has to contain one of {DataDrift.SegmentType}!');
         }
 
-        if (typeof $task !== 'function') {
-            throw new Error('The WorkflowItem task has to be a callable!');
-        }
+        //if (typeof $task !== 'function') {
+        //    throw new Error('The WorkerItem task has to be a callable!');
+        //}
 
         this.type = $type;
 
         /**
-         * The function which represents a task in a (blocking) workflow.
-         * The function will receive the whole state and data by ref.
-         * If it needs to run asynchonous tasks, it may return a Promise.
-         *
-         * @throws on rejected Promise
-         * @param {Object.<{state, data}>} $item
-         * @returns {Promise|undefined}
+         * @type {Stream|Readable|Writable|Transform}
          */
         this.task = $task;
 
@@ -59,16 +53,5 @@ module.exports.WorkflowItem = class WorkflowItem extends LinkedList.Item {
 
     get id() {
         return this[sym.itemID];
-    };
-};
-
-/**
- * List-Item for streaming tasks
- *
- * @type {PipelineItem}
- */
-module.exports.PipelineItem = class PipelineItem extends LinkedList.Item {
-    constructor() {
-        super();
     };
 };

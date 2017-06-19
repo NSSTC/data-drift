@@ -1,5 +1,7 @@
 'use strict';
 
+const Stream = require('stream');
+
 const Option = require('rustify-js').Option;
 const Result = require('rustify-js').Result;
 const VError = require('verror');
@@ -15,14 +17,13 @@ h.prototype.registerSegment = function ($type, $segment) {
 
     if (
         type.isNone()
-        // todo: NodeJSv8+ Object.values(h.SegmentTypes).includes(type.unwrap())
+        // todo: NodeJSv8+ Object.values(h.SegmentType).includes(type.unwrap())
         || Object
-            .keys(h.SegmentTypes)
-            .map(item => h.SegmentTypes[item])
+            .keys(h.SegmentType)
+            .map(item => h.SegmentType[item])
             .indexOf(type.unwrap())
             < 0
         || segment.isNone()
-        || typeof segment.unwrap() !== 'function'
         // todo: also check the segment argument-count against the type
     ) {
         return Result.fromError(new VError({
@@ -43,39 +44,13 @@ h.prototype.registerSegment = function ($type, $segment) {
         .or({ type: 0, })
         .type;
 
-    if (
-        $type === h.SegmentTypes.SOURCE
-        && headType === h.SegmentTypes.SOURCE
-    ) {
-        return Result.fromError(new VError({
-            name: 'RegisterError',
-            cause: new Error('A source has already been registered before. There can only be one source.'),
-            info: {
-                errno: 'ESOURCEALREADYREGISTERED',
-            },
-        }));
-    }
-
     const tailType = Option
         .fromGuess(this[sym.list].tail)
         .or({ type: 0, })
         .type;
 
-    if (
-        $type === h.SegmentTypes.DRAIN
-        && tailType === h.SegmentTypes.DRAIN
-    ) {
-        return Result.fromError(new VError({
-            name: 'RegisterError',
-            cause: new Error('A drain has already been registered before. There can only be one drain.'),
-            info: {
-                errno: 'EDRAINALREADYREGISTERED',
-            },
-        }));
-    }
-
     const tryItem = Result.fromTry(
-        () => { return new Item.WorkflowItem($type, $segment); }
+        () => { return new Item.WorkerItem($type, $segment); }
     );
 
     if (tryItem.isErr()) {
@@ -90,17 +65,37 @@ h.prototype.registerSegment = function ($type, $segment) {
 
     const newItem = tryItem.unwrap();
     switch ($type) {
-        case h.SegmentTypes.SOURCE: {
+        case h.SegmentType.SOURCE: {
+            if (headType === h.SegmentType.SOURCE) {
+                return Result.fromError(new VError({
+                    name: 'RegisterError',
+                    cause: new Error('A source has already been registered before. There can only be one source.'),
+                    info: {
+                        errno: 'ESOURCEALREADYREGISTERED',
+                    },
+                }));
+            }
+
+            if (!($segment instanceof Stream.Readable)) {
+                return Result.fromError(new VError({
+                    name: 'RegisterError',
+                    cause: new Error('A source must be derived from a readable stream.'),
+                    info: {
+                        errno: 'ESOURCEMUSTBEREADABLESTREAM',
+                    },
+                }));
+            }
+
             this[sym.list].prepend(newItem);
-            if (tailType === h.SegmentTypes.DRAIN) {
+            if (tailType === h.SegmentType.DRAIN) {
                 this[sym.workable] = true;
             }
 
             break;
         }
 
-        case h.SegmentTypes.WORKER: {
-            if (tailType === h.SegmentTypes.DRAIN) {
+        case h.SegmentType.WORKER: {
+            if (tailType === h.SegmentType.DRAIN) {
                 this[sym.list].tail.prepend(newItem);
             }
             else {
@@ -110,9 +105,29 @@ h.prototype.registerSegment = function ($type, $segment) {
             break;
         }
 
-        case h.SegmentTypes.DRAIN: {
+        case h.SegmentType.DRAIN: {
+            if (tailType === h.SegmentType.DRAIN) {
+                return Result.fromError(new VError({
+                    name: 'RegisterError',
+                    cause: new Error('A drain has already been registered before. There can only be one drain.'),
+                    info: {
+                        errno: 'EDRAINALREADYREGISTERED',
+                    },
+                }));
+            }
+
+            if (!($segment instanceof Stream.Writable)) {
+                return Result.fromError(new VError({
+                    name: 'RegisterError',
+                    cause: new Error('A drain must be derived from a writable stream.'),
+                    info: {
+                        errno: 'EDRAINMUSTBEWRITABLESTREAM',
+                    },
+                }));
+            }
+
             this[sym.list].append(newItem);
-            if (headType === h.SegmentTypes.SOURCE) {
+            if (headType === h.SegmentType.SOURCE) {
                 this[sym.workable] = true;
             }
 
