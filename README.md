@@ -37,7 +37,7 @@ $ npm i data-drift
 
 const Stream = require('stream');
 
-const DD = require('.');
+const DD = require('data-drift');
 
 
 const pipeline = new DD();
